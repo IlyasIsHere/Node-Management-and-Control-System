@@ -1,5 +1,3 @@
-# test_user.py
-
 from user import User
 
 def main():
@@ -17,8 +15,9 @@ def main():
         # Connect to the server
         user.connect_to_server()
 
-        # Perform interactions with the SSH connection
-        # For example, you can execute remote commands or do other tasks here
+        # Execute the SLURM command
+        slurm_command = 'sinfo -o "%20N  %10c  %10m  %25f  %10G "'
+        user.execute_command(slurm_command)
 
     finally:
         # Close the connection when done
