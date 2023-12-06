@@ -19,6 +19,9 @@ def main():
         slurm_command = 'sinfo -o "%20N  %10c  %10m  %25f  %10G "'
         user.execute_command(slurm_command)
 
+        # Execute get nodes info method
+        # user.get_nodes_info() (Parsing not working properly)
+
     finally:
         # Close the connection when done
         user.close_connection()

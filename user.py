@@ -50,6 +50,34 @@ class User:
                 print(f"Error executing command: {error}")
             else:
                 print(f"Command executed successfully:\n{output}")
+                return output
+
+            # Other way of getting the output of the command, to use in get_nodes_info
+
+            # # Get the output of the command
+            # output_lines = stdout.read().decode("utf-8").splitlines()
+
+            # return output_lines
 
         except Exception as e:
             print(f"Error executing remote command: {str(e)}")
+
+    # TO DO : handle parsing properly in get_nodes_info
+
+    # def get_nodes_info(self): 
+    #     # Execute the SLURM command and parse the data
+    #     slurm_command = 'sinfo -o "%20N  %10c  %10m  %25f  %10G "'
+    #     slurm_output = self.execute_command(slurm_command)
+
+    #     # Parse and format the output
+    #     parsed_data = {}
+    #     for line in slurm_output[1:]:  # Skip the header
+    #         node, cpus, memory, features, gres = line.split(None, 4)
+    #         parsed_data[node] = {
+    #             'CPUs': int(cpus),
+    #             'Memory': int(memory),
+    #             'Available Features': features,
+    #             'GRES': gres
+    #         }
+
+    #     return parsed_data
