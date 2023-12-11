@@ -1,4 +1,5 @@
 import paramiko
+import re
 
 class User:
     def __init__(self, username, hostname, password):
@@ -20,8 +21,12 @@ class User:
             
             print(f"Connected to {self.hostname} as {self.username}")
 
+            return True
+
         except Exception as e:
             print(f"Error connecting to the server: {str(e)}")
+
+            return False
 
     def close_connection(self):
         try:
@@ -29,8 +34,12 @@ class User:
             if self.ssh_client:
                 self.ssh_client.close()
                 print("Connection closed")
+
+                return True
         except Exception as e:
             print(f"Error closing the connection: {str(e)}")
+
+            return False
 
     def execute_command(self, command):
         try:
@@ -62,6 +71,44 @@ class User:
         except Exception as e:
             print(f"Error executing remote command: {str(e)}")
 
+    def get_nodes(self): 
+        # Execute the SLURM command
+        slurm_command = 'sinfo -o "%20N"'
+        slurm_output = self.execute_command(slurm_command)
+
+        # Parse and format the output
+        nodes = []
+        node = ""
+        for line in slurm_output[8:]:
+            elem = line.strip()
+            if elem == ",":
+                nodes.append(node)
+                node = ""
+            else:
+                node += elem
+
+        # Handle the last node because it is not followed by a comma ","
+        if node:
+            nodes.append(node)
+
+        # Split node ranges (example: node[01-03] becomes node01, node02, node03
+        pattern = r'^node\[(\d{1,2})-(\d{1,2})\]$'
+        expanded_nodes = []
+        for node in nodes.copy():
+            match = re.match(pattern, node)
+            if match:
+                # Access the full match as match.group(0)
+                matched_string = match.group(0)
+                first_node = int(match.group(1))
+                last_node = int(match.group(2))
+                nodes.remove(node)
+                expanded_nodes.extend([f"node{i:02d}" for i in range(first_node, last_node + 1)])
+
+        # Add the expanded nodes back to the list
+        nodes.extend(expanded_nodes)
+
+        return nodes
+    
     # TO DO : handle parsing properly in get_nodes_info
 
     # def get_nodes_info(self): 
