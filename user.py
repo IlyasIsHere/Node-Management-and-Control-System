@@ -58,7 +58,7 @@ class User:
             if error:
                 print(f"Error executing command: {error}")
             else:
-                print(f"Command executed successfully:\n{output}")
+                # print(f"Command executed successfully:\n{output}")
                 return output
 
             # Other way of getting the output of the command, to use in get_nodes_info
@@ -97,8 +97,6 @@ class User:
         for node in nodes.copy():
             match = re.match(pattern, node)
             if match:
-                # Access the full match as match.group(0)
-                matched_string = match.group(0)
                 first_node = int(match.group(1))
                 last_node = int(match.group(2))
                 nodes.remove(node)
@@ -108,23 +106,28 @@ class User:
         nodes.extend(expanded_nodes)
 
         return nodes
-    
-    # TO DO : handle parsing properly in get_nodes_info
 
-    # def get_nodes_info(self): 
-    #     # Execute the SLURM command and parse the data
-    #     slurm_command = 'sinfo -o "%20N  %10c  %10m  %25f  %10G "'
-    #     slurm_output = self.execute_command(slurm_command)
+    def get_nodes_info(self):
+        # Execute the SLURM command
+        slurm_command = 'scontrol show nodes'
+        slurm_output = self.execute_command(slurm_command)
 
-    #     # Parse and format the output
-    #     parsed_data = {}
-    #     for line in slurm_output[1:]:  # Skip the header
-    #         node, cpus, memory, features, gres = line.split(None, 4)
-    #         parsed_data[node] = {
-    #             'CPUs': int(cpus),
-    #             'Memory': int(memory),
-    #             'Available Features': features,
-    #             'GRES': gres
-    #         }
+        # Parse and format the output
+        nodes_info = {}
 
-    #     return parsed_data
+        # Define patterns to extract information
+        node_info_pattern = re.compile(r'NodeName=(\S+)(.*?)(?=(?:NodeName=|\Z))', re.DOTALL)
+        specific_keys_pattern = re.compile(r'(CPUAlloc|CPUErr|CPUTot|AllocMem|FreeMem|Gres|AvailableFeatures)=(\S+)')
+
+        matches = node_info_pattern.findall(slurm_output)
+
+        for match in matches:
+            node_name, inner_info = match
+
+            specific_keys_matches = specific_keys_pattern.findall(inner_info)
+
+            if specific_keys_matches:
+                node_info = {key: value for key, value in specific_keys_matches}
+                nodes_info[node_name] = node_info
+
+        return nodes_info

@@ -20,10 +20,12 @@ def main():
         user.execute_command(slurm_command)
 
         # Execute get nodes method
+        print("get_nodes:")
         print(user.get_nodes())
 
         # Execute get nodes info method
-        # user.get_nodes_info() (Parsing not working properly)
+        print("get_nodes_info:")
+        print(user.get_nodes_info())
 
     finally:
         # Close the connection when done
