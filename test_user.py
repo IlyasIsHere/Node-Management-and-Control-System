@@ -5,7 +5,7 @@ def main():
     user_info = {
         'username': 'ilyas.boudhaine',
         'hostname': 'simlab-cluster.um6p.ma',
-        'password': 'ilyas123'
+        'password': '123456'
     }
 
     # Create a User instance

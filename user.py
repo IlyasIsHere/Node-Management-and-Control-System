@@ -25,9 +25,7 @@ class User:
 
         except Exception as e:
             print(f"Error connecting to the server: {str(e)}")
-
-            return False
-
+            raise
     def close_connection(self):
         try:
             # Close the SSH connection
