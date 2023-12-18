@@ -1,14 +1,18 @@
 import paramiko
 import re
 import bcrypt
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 class User:
-    def __init__(self, username, hostname):
+    def __init__(self, username, hostname, password=None):
         self.username = username
         self.hostname = hostname
         self.ssh_client = None
+        self.password = password
 
-    def connect_to_server(self, password):
+    def connect_to_server(self):
         try:
             # Create an SSH client
             self.ssh_client = paramiko.SSHClient()
@@ -16,35 +20,40 @@ class User:
             # Automatically add the server's host key
             self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            # Connect to the remote server
-            self.ssh_client.connect(self.hostname, username=self.username, password=password)
+            # Connect to the remote server using password authentication
+            if self.password:
+                self.ssh_client.connect(self.hostname, username=self.username, password=self.password)
+            else:
+                raise ValueError("No password provided")
 
-            print(f"Connected to {self.hostname} as {self.username}")
+            logging.info(f"Connected to {self.hostname} as {self.username}")
 
             return True
-
-        except Exception as e:
-            print(f"Error connecting to the server: {str(e)}")
+        except paramiko.AuthenticationException as e:
+            logging.error(f"Authentication error: {str(e)}")
             return False
-        
+        except paramiko.SSHException as e:
+            logging.error(f"SSH error: {str(e)}")
+            return False
+        except Exception as e:
+            logging.error(f"Error connecting to the server: {str(e)}")
+            return False
+
     def close_connection(self):
         try:
-            # Close the SSH connection
             if self.ssh_client:
                 self.ssh_client.close()
-                print("Connection closed")
-
+                logging.info("Connection closed")
                 return True
         except Exception as e:
-            print(f"Error closing the connection: {str(e)}")
-
+            logging.error(f"Error closing the connection: {str(e)}")
             return False
 
     def execute_command(self, command):
         try:
             # Check if the connection is established
             if not self.ssh_client:
-                print("Not connected to the server.")
+                logging.warning("Not connected to the server.")
                 return None
 
             # Execute the remote command
@@ -55,13 +64,12 @@ class User:
             error = stderr.read().decode("utf-8")
 
             if error:
-                print(f"Error executing command: {error}")
+                logging.error(f"Error executing command: {error}")
             else:
-                # print(f"Command executed successfully:\n{output}")
                 return output
 
         except Exception as e:
-            print(f"Error executing remote command: {str(e)}")
+            logging.error(f"Error executing remote command: {str(e)}")
 
     def get_nodes(self): 
         # Execute the SLURM command
