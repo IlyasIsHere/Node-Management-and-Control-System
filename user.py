@@ -99,6 +99,13 @@ class User:
 
         return nodes
 
+    def node_jobs_running(self, node):
+        # Execute the SLURM command
+        slurm_command = 'squeue -h -w {node_name} -o "%.8T" | grep -c "R"'.format(node_name = node)
+        slurm_output = self.execute_command(slurm_command)
+
+        return int(slurm_output)
+        
     def get_nodes_info(self):
         # Execute the SLURM command
         slurm_command = 'scontrol show nodes'
@@ -120,6 +127,7 @@ class User:
 
             if specific_keys_matches:
                 node_info = {key: value for key, value in specific_keys_matches}
+                node_info['curr_r_jobs'] = self.node_jobs_running(node_name)
                 nodes_info[node_name] = node_info
 
         return nodes_info

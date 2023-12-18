@@ -27,6 +27,12 @@ def main():
         print("get_nodes_info:")
         print(user.get_nodes_info())
 
+        # Execute node jobs running info method
+        print("node_jobs_running node04:")
+        print(user.node_jobs_running("node04"))
+        print("node_jobs_running node14:")
+        print(user.node_jobs_running("node14"))
+
     finally:
         # Close the connection when done
         user.close_connection()

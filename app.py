@@ -3,6 +3,7 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from user import User
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
 # Layout for login page
@@ -60,6 +61,7 @@ def display_page(pathname):
     State("username-input", "value"),
     State("password-input", "value")
 )
+
 def login(n_clicks, username, password):
     if n_clicks is None:
         return "", dash.no_update
@@ -77,5 +79,6 @@ def login(n_clicks, username, password):
     else:
         # If authentication fails, return an error message
         return "Invalid credentials", dash.no_update
+    
 if __name__ == '__main__':
     app.run_server(debug=True)
