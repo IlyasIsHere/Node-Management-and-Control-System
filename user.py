@@ -3,28 +3,13 @@ import re
 import bcrypt
 
 class User:
-    def __init__(self, username, hostname, hashed_password=None):
+    def __init__(self, username, hostname):
         self.username = username
         self.hostname = hostname
         self.ssh_client = None
-        self.hashed_password = hashed_password
-
-    def set_password(self, password):
-        # Hash the password using bcrypt
-        salt = bcrypt.gensalt()
-        self.hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-
-    def check_password(self, password):
-        # Check if the provided password matches the hashed password
-        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password)
 
     def connect_to_server(self, password):
         try:
-            # Check if the provided password matches the hashed password
-            if not self.check_password(password):
-                print("Invalid password")
-                return False
-
             # Create an SSH client
             self.ssh_client = paramiko.SSHClient()
 
