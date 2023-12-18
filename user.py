@@ -1,15 +1,30 @@
 import paramiko
 import re
+import bcrypt
 
 class User:
-    def __init__(self, username, hostname, password):
+    def __init__(self, username, hostname, hashed_password=None):
         self.username = username
         self.hostname = hostname
-        self.password = password
         self.ssh_client = None
+        self.hashed_password = hashed_password
 
-    def connect_to_server(self):
+    def set_password(self, password):
+        # Hash the password using bcrypt
+        salt = bcrypt.gensalt()
+        self.hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+    def check_password(self, password):
+        # Check if the provided password matches the hashed password
+        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password)
+
+    def connect_to_server(self, password):
         try:
+            # Check if the provided password matches the hashed password
+            if not self.check_password(password):
+                print("Invalid password")
+                return False
+
             # Create an SSH client
             self.ssh_client = paramiko.SSHClient()
 
@@ -17,8 +32,8 @@ class User:
             self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
             # Connect to the remote server
-            self.ssh_client.connect(self.hostname, username=self.username, password=self.password)
-            
+            self.ssh_client.connect(self.hostname, username=self.username, password=password)
+
             print(f"Connected to {self.hostname} as {self.username}")
 
             return True
