@@ -1,18 +1,16 @@
 import paramiko
 import re
-import bcrypt
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
 class User:
-    def __init__(self, username, hostname, password=None):
+    def __init__(self, username, hostname):
         self.username = username
         self.hostname = hostname
         self.ssh_client = None
-        self.password = password
 
-    def connect_to_server(self):
+    def connect_to_server(self, password):
         try:
             # Create an SSH client
             self.ssh_client = paramiko.SSHClient()
@@ -21,17 +19,15 @@ class User:
             self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
             # Connect to the remote server using password authentication
-            if self.password:
-                self.ssh_client.connect(self.hostname, username=self.username, password=self.password)
+            if password:
+                self.ssh_client.connect(self.hostname, username=self.username, password=password)
             else:
                 raise ValueError("No password provided")
 
             logging.info(f"Connected to {self.hostname} as {self.username}")
 
             return True
-        except paramiko.AuthenticationException as e:
-            logging.error(f"Authentication error: {str(e)}")
-            return False
+        
         except paramiko.SSHException as e:
             logging.error(f"SSH error: {str(e)}")
             return False
