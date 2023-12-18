@@ -61,13 +61,6 @@ class User:
                 # print(f"Command executed successfully:\n{output}")
                 return output
 
-            # Other way of getting the output of the command, to use in get_nodes_info
-
-            # # Get the output of the command
-            # output_lines = stdout.read().decode("utf-8").splitlines()
-
-            # return output_lines
-
         except Exception as e:
             print(f"Error executing remote command: {str(e)}")
 
