@@ -4,8 +4,7 @@ def main():
     # User information
     user_info = {
         'username': 'ilyas.boudhaine',
-        'hostname': 'simlab-cluster.um6p.ma',
-        'password': 'ilyas123'
+        'hostname': 'simlab-cluster.um6p.ma'
     }
 
     # Create a User instance
@@ -13,7 +12,7 @@ def main():
 
     try:
         # Connect to the server
-        user.connect_to_server()
+        user.connect_to_server('ilyas123') 
 
         # Execute the SLURM command
         slurm_command = 'sinfo -o "%20N  %10c  %10m  %25f  %10G "'
