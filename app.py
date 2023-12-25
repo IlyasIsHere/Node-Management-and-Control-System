@@ -83,10 +83,11 @@ def display_page(pathname):
 # Callback to handle login
 @app.callback(
     Output("login-output", "children"),
-    Output("url", "pathname"),
+    Output("url", "pathname", allow_duplicate=True),
     Input("login-button", "n_clicks"),
     State("username-input", "value"),
-    State("password-input", "value")
+    State("password-input", "value"),
+    prevent_initial_call=True
 )
 def login(n_clicks, username, password):
     if n_clicks is None:
@@ -106,6 +107,10 @@ def login(n_clicks, username, password):
 
         global dashboard_layout
         dashboard_layout = html.Div([
+            html.Div([
+                dbc.Button("Logout", id="logout-button", color="danger", className="mt-3"),
+            ], style={'position': 'absolute', 'top': -14, 'right': 48, 'zIndex': 1000}),
+            
             html.H1("Node Management Dashboard"),
 
             # Dropdown for selecting a node
@@ -117,8 +122,9 @@ def login(n_clicks, username, password):
 
             # Flex layout for multiple charts
             html.Div(id='charts-container', style={'display': 'flex', 'flexWrap': 'wrap', 'justifyContent': 'space-around'}),
-            html.Div(id="other-info")
-        ], style={'margin': "1em"})
+            html.Div(id="other-info"),
+
+        ], style={'margin': "1em", 'padding-left': '2em', 'padding-right': '2em', 'margin-top': '-3px'})
 
         session["username"] = username
         return "", "/dashboard"
@@ -128,6 +134,20 @@ def login(n_clicks, username, password):
     
 
 shadow_style = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)"
+
+
+# Callback to handle logout
+@app.callback(
+    Output("url", "pathname"),
+    Input("logout-button", "n_clicks"),
+)
+def logout(n_clicks):
+    if n_clicks is None:
+        return dash.no_update
+
+    # Clear the session and redirect to the login page
+    session.clear()
+    return "/login"
 
 
 @app.callback(
