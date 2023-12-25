@@ -37,7 +37,7 @@ login_layout = dbc.Container(
                     dbc.Input(type="password", id="password-input", placeholder="Enter password"),
                 ], className="mb-3"),
                 dbc.Button("Login", id="login-button", color="primary", className="mr-1"),
-                html.Div(id="login-output", className="mt-3"),
+                html.Div(id="login-output", className="mt-3 alert alert-danger", style={"display": "none"}),
                 dcc.Location(id='url-redirect', refresh=False),
             ]),
             width=6,
@@ -83,7 +83,8 @@ def display_page(pathname):
 # Callback to handle login
 @app.callback(
     Output("login-output", "children"),
-    Output("url", "pathname", allow_duplicate=True),
+     Output("login-output", "style"),
+    Output("url", "pathname"),
     Input("login-button", "n_clicks"),
     State("username-input", "value"),
     State("password-input", "value"),
@@ -91,7 +92,7 @@ def display_page(pathname):
 )
 def login(n_clicks, username, password):
     if n_clicks is None:
-        return "", dash.no_update
+        return "", {"display": "none"}, dash.no_update
 
     # Attempt SSH login
     user_info = {
@@ -99,7 +100,8 @@ def login(n_clicks, username, password):
         'hostname': 'simlab-cluster.um6p.ma'
     }
     user = User(**user_info)
-    if user.connect_to_server(password):
+    connectionToServer = user.connect_to_server(password)
+    if connectionToServer == 0:
         # If the connection is successful, return empty string for login-output and redirect to /dashboard
         global nodes, nodes_info, dashboard_layout
         nodes = user.get_nodes()
@@ -127,10 +129,13 @@ def login(n_clicks, username, password):
         ], style={'margin': "1em", 'padding-left': '2em', 'padding-right': '2em', 'margin-top': '-3px'})
 
         session["username"] = username
-        return "", "/dashboard"
-    else:
+        return "", {"display": "none"}, "/dashboard"
+    elif (connectionToServer == 1):
         # If authentication fails, return an error message
-        return "Invalid credentials", dash.no_update
+        return  "Invalid credentials", {"color": "red", "border": "1px solid red", "padding": "10px", "border-radius": "5px", "background-color": "#ffe6e6", "display": "block"}, dash.no_update
+    else:
+        # If the connection fails, return an error message
+        return "Error connecting to the server, try to log with UM6P's WIFI or VPN ", {"color": "red", "border": "1px solid red", "padding": "10px", "border-radius": "5px", "background-color": "#ffe6e6", "display": "block"}, dash.no_update
     
 
 shadow_style = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)"

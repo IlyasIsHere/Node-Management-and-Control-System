@@ -26,14 +26,15 @@ class User:
 
             logging.info(f"Connected to {self.hostname} as {self.username}")
 
-            return True
+            return 0
         
         except paramiko.SSHException as e:
             logging.error(f"SSH error: {str(e)}")
-            return False
+            return 1
         except Exception as e:
             logging.error(f"Error connecting to the server: {str(e)}")
-            return False
+            
+            return 2
 
     def close_connection(self):
         try:
