@@ -84,7 +84,7 @@ def display_page(pathname):
 @app.callback(
     Output("login-output", "children"),
      Output("login-output", "style"),
-    Output("url", "pathname"),
+    Output("url", "pathname", allow_duplicate=True),
     Input("login-button", "n_clicks"),
     State("username-input", "value"),
     State("password-input", "value"),
@@ -169,6 +169,17 @@ def update_charts(selected_node):
     curr_r_jobs = selected_node_info["curr_r_jobs"]
     cpu_err = selected_node_info["CPUErr"]
     features = selected_node_info["AvailableFeatures"]
+    num_gpus = 0 if selected_node_info["Gres"] == "(null)" else 1
+
+    if selected_node_info.get("isGPUAvailable") != None:
+        if selected_node_info["isGPUAvailable"]:
+            gpu_available_html = html.P([html.Strong("The gpu is available.")])
+        else:
+            gpu_available_html = html.P([html.Strong("The gpu is not available.")])
+    else:
+        gpu_available_html = html.P()
+
+
 
     other_info = [
         html.P([
@@ -183,6 +194,11 @@ def update_charts(selected_node):
             html.Strong("Features: "),
             str(features)
         ]),
+        html.P([
+            html.Strong("Number of GPUs: "),
+            str(num_gpus)
+        ]),
+        gpu_available_html
     ]
 
 

@@ -135,4 +135,16 @@ class User:
                 node_info['curr_r_jobs'] = self.node_jobs_running(node_name)
                 nodes_info[node_name] = node_info
 
+
+        slurm_command2 = '(squeue -t RUNNING -o \"%N %b %C\" | awk \"NR>1 {split(\\$2, gpuArray, \\\":\\\"); nodes[\\$1]+=\\$2; gpus[\\$1]+=gpuArray[2]; cpus[\\$1]+=\\$3} END {for (node in nodes) print node, 1-gpu s[node], 44-cpus[node]}\" && sinfo -p gpu --states=idle --noheader -o \"%n %G %c\" | grep -v -e \"maint\" -e \"drain\" -e \"resv\" | awk \"{gsub(/[^0-9]/, \\\"\\\", \\$2); print \\$1, \\$2, \\$3}\") | grep -F \" $(sinfo -o \"%n %G\" | grep \"gpu\" | awk \"{print \\$1}\")\" | column -t'
+        slurm_output2 = self.execute_command(slurm_command2)
+
+        lines = slurm_output2.split('\n')
+
+        # Extract the node name and the second column for each line
+        parsed_data = [(line.split()[0], int(line.split()[1])) for line in lines if line]
+        
+        for node, value in parsed_data:
+            nodes_info[node]["isGPUAvailable"] = (value == 1)
+
         return nodes_info
